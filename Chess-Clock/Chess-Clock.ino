@@ -33,7 +33,17 @@ void setup() {
 
   timer1.setCounter(0, 5, 0, timer2.COUNT_DOWN, onComplete);
   timer2.setCounter(0, 5, 0, timer2.COUNT_DOWN, onComplete);
+
+  timer1.setInterval(refreshClock, 1000);
+  timer2.setInterval(refreshClock, 1000);
 }
+
+void refreshClock() {
+	Serial.print("Current count time is: ");
+    Serial.println(timer1.getCurrentTime());
+    Serial.println(timer2.getCurrentTime());
+}
+
 void onComplete() {
 	Serial.println("Complete!!!");
 }
@@ -42,10 +52,7 @@ void loop() {
   tm16371.display(1234);
   tm16372.display(4567);
 
-  button1State = digitalRead(Button1Pin);
-  button2State = digitalRead(Button2Pin);
-  button3State = digitalRead(Button3Pin);
-
+  
   if(button1State == HIGH){
   timer1.run();
   timer2.pause();    
@@ -60,4 +67,10 @@ void loop() {
     timer1.restart();
     timer2.restart();
   }
+
+
+  button1State = digitalRead(Button1Pin);
+  button2State = digitalRead(Button2Pin);
+  button3State = digitalRead(Button3Pin);
+
 }
