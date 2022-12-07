@@ -14,9 +14,12 @@ const int Button3Pin = 12;
 int button1State = 0; 
 int button2State = 0; 
 int button3State = 0; 
-TM1637 tm16371(2, 3);
 
+TM1637 tm16371(2, 3);
+Countimer timer1;
+Countimer timer2;
 TM1637 tm16372(4, 5);
+
 void setup() {
  
   Serial.begin(9600);
@@ -27,6 +30,9 @@ void setup() {
   pinMode(Button1Pin, INPUT);
   pinMode(Button2Pin, INPUT);
   pinMode(Button3Pin, INPUT);
+
+  timer1.setCounter(0, 5, 0, timer.COUNT_DOWN);
+  timer2.setCounter(0, 5, 0, timer.COUNT_DOWN);
 }
 
 void loop() {
@@ -39,10 +45,17 @@ void loop() {
   button3State = digitalRead(Button3Pin);
 
   if(button1State == HIGH){
-    Serial.println("Y");
+  timer1.run();
+  timer2.pause();    
   }
-  else {
-  Serial.println("N");
+  if(button2State == HIGH){
+  timer2.run();
+  timer1.pause();    
   }
-
+  if (button3State == HIGH) {
+    timer1.pause();
+    timer2.pause();
+    timer1.restart();
+    timer2.restart();
+  }
 }
