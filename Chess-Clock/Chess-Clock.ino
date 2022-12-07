@@ -31,10 +31,12 @@ void setup() {
   pinMode(Button2Pin, INPUT);
   pinMode(Button3Pin, INPUT);
 
-  timer1.setCounter(0, 5, 0, timer.COUNT_DOWN);
-  timer2.setCounter(0, 5, 0, timer.COUNT_DOWN);
+  timer1.setCounter(0, 5, 0, timer2.COUNT_DOWN, onComplete);
+  timer2.setCounter(0, 5, 0, timer2.COUNT_DOWN, onComplete);
 }
-
+void onComplete() {
+	Serial.println("Complete!!!");
+}
 void loop() {
   
   tm16371.display(1234);
