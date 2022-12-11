@@ -1,76 +1,82 @@
-#include "Countimer.h"
-#include <TM1637.h>
+  #include "Countimer.h"
+  #include <TM1637Display.h>
 
-int CLK1 = 2;
-int DIO1 = 3;
 
-int CLK2 = 4;
-int DIO2 = 5;
+  #define CLK1 2
+  #define DIO1 3
+  #define CLK2 4
+  #define DIO2 5
 
-const int Button1Pin = 8;
-const int Button2Pin = 10;
-const int Button3Pin = 12;
 
-int button1State = 0; 
-int button2State = 0; 
-int button3State = 0; 
+  uint8_t data1[] = {0, 0, 0, 0};
+  uint8_t data2[] = {0, 0, 0, 0};
 
-TM1637 tm16371(2, 3);
-Countimer timer1;
-Countimer timer2;
-TM1637 tm16372(4, 5);
+  TM1637Display display1(CLK1, DIO1);
+  TM1637Display display2(CLK2, DIO2);
+  int pinButton = 8;
+  int OnOff = 9;
+  int OnOffS;
+  int State;
 
-void setup() {
- 
-  Serial.begin(9600);
-  
-  tm16371.init();
-  tm16372.init();
+  Countimer timer1;
+  Countimer timer2;
+  void setup() {
+    // put your setup code here, to run once:
+    display1.setBrightness(2);
+    
+    display2.setBrightness(2);  
+    
+    timer1.setCounter(0, 10, 5, timer1.COUNT_DOWN, onComplete);    
+    timer2.setCounter(0, 10, 5, timer2.COUNT_DOWN, onComplete);    
+    timer1.setInterval(refreshClock1, 1000);
+    timer2.setInterval(refreshClock2, 1000);
+    pinMode(pinButton, INPUT_PULLUP);
+    pinMode(OnOff, INPUT_PULLUP);
+    Serial.begin(9600);
+  }
 
-  pinMode(Button1Pin, INPUT);
-  pinMode(Button2Pin, INPUT);
-  pinMode(Button3Pin, INPUT);
-
-  timer1.setCounter(0, 5, 0, timer2.COUNT_DOWN, onComplete);
-  timer2.setCounter(0, 5, 0, timer2.COUNT_DOWN, onComplete);
-
-  timer1.setInterval(refreshClock, 1000);
-  timer2.setInterval(refreshClock, 1000);
-}
-
-void refreshClock() {
-	Serial.print("Current count time is: ");
+  void refreshClock1() {
+    Serial.print("White: ");
     Serial.println(timer1.getCurrentTime());
+  }
+  void refreshClock2() {
+    Serial.print("BLack: ");
     Serial.println(timer2.getCurrentTime());
-}
-
-void onComplete() {
-	Serial.println("Complete!!!");
-}
-void loop() {
-  
-  tm16371.display(1234);
-  tm16372.display(4567);
-
-  
-  if(button1State == HIGH){
-  timer1.run();
-  timer2.pause();    
   }
-  if(button2State == HIGH){
-  timer2.run();
-  timer1.pause();    
+  void onComplete() {
+    
   }
-  if (button3State == HIGH) {
+  void loop() {
+    State = digitalRead(pinButton);
+    OnOffS = digitalRead(OnOff);
+    
+    if (OnOffS == 1) {
+    if(State == 0){
+      data1[0] = display1.encodeDigit(timer1.getCurrentMinutes()/10 % 10);
+      data1[1] = display1.encodeDigit(timer1.getCurrentMinutes()/1 % 10);
+      data1[2] = display1.encodeDigit(timer1.getCurrentSeconds()/10 % 10);
+      data1[3] = display1.encodeDigit(timer1.getCurrentSeconds()/1 % 10);
+      
+      timer1.run();
+      timer1.start();
+      timer2.pause();
+
+      display1.setSegments(data1);
+    }
+    else {
+    data2[0] = display2.encodeDigit(timer2.getCurrentMinutes()/10 % 10);
+    data2[1] = display2.encodeDigit(timer2.getCurrentMinutes()/1 % 10);
+    data2[2] = display2.encodeDigit(timer2.getCurrentSeconds()/10 % 10);
+    data2[3] = display2.encodeDigit(timer2.getCurrentSeconds()/1 % 10);
+    
+    timer2.run();
+    timer2.start();
     timer1.pause();
-    timer2.pause();
-    timer1.restart();
-    timer2.restart();
+
+    display2.setSegments(data2);
+    
+    } 
+    }
+    
+    
   }
-
-
-  button1State = digitalRead(Button1Pin);
-  button2State = digitalRead(Button2Pin);
-  button3State = digitalRead(Button3Pin);
-
-}
